@@ -144,8 +144,9 @@
   </button>
   <!-- Stroke Thickness Slider -->
   <div class="slider-container">
-    <label for="thicknessRange">Thickness: </label>
     <input type="range" id="thicknessRange" min="1" max="20" value="2" />
+    <span id="thicknessValue">2</span>
+
   </div>
   <!-- Color Picker -->
   <input type="color" id="colorPicker" value="#000000" title="Pick Color" />
@@ -331,7 +332,32 @@
 
   // Delete Object
   document.getElementById('deleteObjBtn').addEventListener('click', () => {
-    const activeObj = canvas.getActiveObject();
+    const activeObject = canvas.getActiveObject();
+
+    // Get an array of all selected objects
+    const activeObjectsArray = canvas.getActiveObjects();
+
+    // To check if something is selected:
+    if (activeObject) {
+      saveState()
+      console.log("An object or a selection is active:", activeObject);
+      canvas.remove(activeObject);
+    } else {
+      console.log("No object is currently active.");
+    }
+
+    // To iterate through all selected objects in a multi-selection:
+    if (activeObjectsArray.length > 0) {
+      console.log("Currently selected objects:");
+      activeObjectsArray.forEach(obj => {
+        console.log(obj.type, obj.id); // Example: log object type and ID
+        canvas.remove(obj)
+      });
+      saveState();
+    } else {
+      console.log("No objects are selected.");
+    }
+
     if (activeObj) {
       saveState();
       canvas.remove(activeObj);
@@ -358,6 +384,7 @@
   // Thickness Slider
   document.getElementById('thicknessRange').addEventListener('input', (e) => {
     strokeWidth = parseInt(e.target.value);
+    thicknessValue.textContent = value;
     if (canvas.freeDrawingBrush) {
       canvas.freeDrawingBrush.width = strokeWidth;
     }
@@ -541,6 +568,9 @@
   // When stroke width or color change, update brush
   thicknessRange.addEventListener('input', () => {
     strokeWidth = parseInt(thicknessRange.value);
+    const thicknessValue = document.getElementById('thicknessValue');
+    thicknessValue.textContent = value;
+
     if (canvas.freeDrawingBrush) {
       canvas.freeDrawingBrush.width = strokeWidth;
     }
