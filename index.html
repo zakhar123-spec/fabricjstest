@@ -383,12 +383,26 @@
       reader.onload = function(f) {
         fabric.Image.fromURL(f.target.result, (img) => {
           saveState();
+          const canvasWidth = canvas.width;
+          const canvasHeight = canvas.height;
+
+          // Calculate scale to fit the image within the canvas while maintaining aspect ratio
+          const scaleX = canvasWidth / img.width;
+          const scaleY = canvasHeight / img.height;
+          const scale = Math.min(scaleX, scaleY);
+
+          // Scale the image
           img.set({
-            left: 50,
-            top: 50,
-            scaleX: 0.5,
-            scaleY: 0.5,
-            selectable: true
+            scaleX: scale,
+            scaleY: scale,
+            originX: 'center',
+            originY: 'center',
+          });
+
+          // Center the image
+          img.set({
+            left: canvasWidth / 2,
+            top: canvasHeight / 2,
           });
           canvas.add(img);
         });
