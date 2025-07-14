@@ -1,623 +1,805 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>DART Sim Rhythm Tool</title>
-<!-- Font Awesome CDN -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/460/fabric.min.js" integrity="sha512-ybPp3kCrNQXdvTfh99YLIdnajWnQvHuEKDJ+b26mxI9w+pLhnBo3HmNLJ1pEUBFO1Q0bfJxApeqecNbmaV763g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  h1 {
-    text-align: center;
-    margin: 10px 0;
-  }
-  /* Controls styling */
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  /* Tool buttons */
-  .tool-btn {
-    background: #f0f0f0;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 1.2em;
-  }
-  .tool-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-  /* Slider & color picker */
-  .slider-container {
-    display: flex;
-    align-items: center;
-  }
-  /* Canvas container */
-  #canvas-container {
-    border: 1px solid #ccc;
-    width: 250px;
-    height: 200px;
-    margin-bottom: 10px;
-  }
-  canvas {
-    width: 100%;
-    height: 100%;
-  }
-  /* Download menu */
-  .download-menu {
-    position: relative;
-    display: inline-block;
-  }
-  .download-btn {
-    background: #4CAF50;
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  .download-options {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 120px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-  }
-  .download-options button {
-    background-color: #f1f1f1;
-    border: none;
-    padding: 8px 12px;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
-  }
-  .download-options button:hover {
-    background-color: #ddd;
-  }
-  .download-menu:hover .download-options {
-    display: block;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabric.js Drawing App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .tool-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tool-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tool-button {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 45px;
+        }
+
+        .tool-button:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+
+        .tool-button.active {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        .tool-button i {
+            font-size: 1.2rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .slider {
+            width: 100px;
+            height: 5px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .color-picker {
+            width: 50px;
+            height: 35px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        #canvas {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .export-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .export-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 120px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .export-dropdown.show {
+            display: block;
+        }
+
+        .export-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .export-option:hover {
+            background: #f8f9fa;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .zoom-level {
+            font-size: 0.8rem;
+            color: #666;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .toolbar {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .app-container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .toolbar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .tool-button {
+                padding: 8px;
+                min-height: 40px;
+            }
+            
+            .tool-button i {
+                font-size: 1rem;
+            }
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+    </style>
 </head>
 <body>
+    <div class="app-container">
+        <div class="header">
+            <h1><i class="fas fa-paint-brush"></i> Drawing Studio</h1>
+        </div>
 
-<h1>Fabric.js Drawing App</h1>
+        <div class="toolbar">
+            <div class="tool-group">
+                <label>Drawing Tools</label>
+                <div class="controls">
+                    <button class="tool-button active" data-tool="select" title="Select">
+                        <i class="fas fa-mouse-pointer"></i>
+                    </button>
+                    <button class="tool-button" data-tool="pencil" title="Pencil">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="tool-button" data-tool="pen" title="Pen">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button class="tool-button" data-tool="line" title="Line">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button class="tool-button" data-tool="eraser" title="Eraser">
+                        <i class="fas fa-eraser"></i>
+                    </button>
+                </div>
+            </div>
 
-<div class="controls">
-  <!-- Tool Buttons -->
-  <button class="tool-btn" id="selectBtn" title="Select" aria-label="Select">
-    <i class="fas fa-mouse-pointer"></i>
-  </button>
-  <button class="tool-btn" id="pencilBtn" title="Pencil" aria-label="Pencil">
-    <i class="fas fa-pencil-alt"></i>
-  </button>
-  <button class="tool-btn" id="penBtn" title="Pen" aria-label="Pen">
-    <i class="fas fa-pen"></i>
-  </button>
-  <button class="tool-btn" id="lineBtn" title="Line" aria-label="Line">
-    <i class="fas fa-minus"></i>
-  </button>
-  <button class="tool-btn" id="eraserBtn" title="Eraser" aria-label="Eraser">
-    <i class="fas fa-eraser"></i>
-  </button>
-  <!-- Undo / Redo -->
-  <button class="tool-btn" id="undoBtn" title="Undo" aria-label="Undo" disabled>
-    <i class="fas fa-undo"></i>
-  </button>
-  <button class="tool-btn" id="redoBtn" title="Redo" aria-label="Redo" disabled>
-    <i class="fas fa-redo"></i>
-  </button>
-  <!-- Select All -->
-  <button class="tool-btn" id="selectAllBtn" title="Select All" aria-label="Select All">
-    <i class="fas fa-square-full"></i>
-  </button>
-  <!-- Lock / Delete -->
-  <button class="tool-btn" id="lockObjBtn" title="Lock/Unlock Object" aria-label="Lock/Unlock Object">
-    <i class="fas fa-lock"></i>
-  </button>
-  <button class="tool-btn" id="deleteObjBtn" title="Delete Object" aria-label="Delete Object">
-    <i class="fas fa-trash"></i>
-  </button>
-  <!-- Zoom In / Out / Reset -->
-  <button class="tool-btn" id="zoomInBtn" title="Zoom In" aria-label="Zoom In">
-    <i class="fas fa-search-plus"></i>
-  </button>
-  <button class="tool-btn" id="zoomOutBtn" title="Zoom Out" aria-label="Zoom Out">
-    <i class="fas fa-search-minus"></i>
-  </button>
-  <button class="tool-btn" id="resetBtn" title="Reset View" aria-label="Reset View">
-    <i class="fas fa-sync-alt"></i>
-  </button>
-  <!-- Stroke Thickness Slider -->
-  <div class="slider-container">
-    <input type="range" id="thicknessRange" min="1" max="20" value="2" />
-    <span id="thicknessValue">2</span>
+            <div class="tool-group">
+                <label>Controls</label>
+                <div class="control-group">
+                    <label>Thickness</label>
+                    <input type="range" id="thickness" class="slider" min="1" max="50" value="2">
+                </div>
+                <div class="control-group">
+                    <label>Color</label>
+                    <input type="color" id="colorPicker" class="color-picker" value="#000000">
+                </div>
+            </div>
 
-  </div>
-  <!-- Color Picker -->
-  <input type="color" id="colorPicker" value="#000000" title="Pick Color" />
-  <!-- Upload Image -->
-  <button class="tool-btn" id="uploadImageBtn" title="Upload Image" aria-label="Upload Image">
-    <i class="fas fa-upload"></i>
-  </button>
-  <input type="file" id="imageUpload" accept="image/*" style="display:none" />
-  <!-- Download Dropdown -->
-  <div class="download-menu">
-    <button class="tool-btn"><i class="fas fa-caret-down"></i></button>
-    <div class="download-options">
-      <button data-type="svg">SVG</button>
-      <button data-type="png">PNG</button>
-      <button data-type="jpeg">JPG</button>
-      <button data-type="json">JSON</button>
+            <div class="tool-group">
+                <label>Actions</label>
+                <div class="controls">
+                    <button class="tool-button" id="undo" title="Undo">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <button class="tool-button" id="redo" title="Redo">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <button class="tool-button" id="selectAll" title="Select All">
+                        <i class="fas fa-dashcube"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <label>Zoom</label>
+                <div class="zoom-controls">
+                    <button class="tool-button" id="zoomIn" title="Zoom In">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <span class="zoom-level" id="zoomLevel">100%</span>
+                    <button class="tool-button" id="zoomOut" title="Zoom Out">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button class="tool-button" id="zoomReset" title="Reset Zoom">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <label>Import/Export</label>
+                <div class="controls">
+                    <input type="file" id="imageUpload" class="file-input" accept="image/*">
+                    <button class="tool-button" id="uploadBtn" title="Upload Image">
+                        <i class="fas fa-upload"></i>
+                    </button>
+                    <div class="export-menu">
+                        <button class="tool-button" id="exportBtn" title="Export">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <div class="export-dropdown" id="exportDropdown">
+                            <button class="export-option" data-format="png">PNG</button>
+                            <button class="export-option" data-format="jpg">JPG</button>
+                            <button class="export-option" data-format="svg">SVG</button>
+                            <button class="export-option" data-format="json">JSON</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas" width="250" height="200"></canvas>
+        </div>
+
+        <div class="action-buttons">
+            <button class="tool-button btn-warning" id="lockObject" title="Lock Selected Object">
+                <i class="fas fa-lock"></i> Lock
+            </button>
+            <button class="tool-button btn-danger" id="deleteObject" title="Delete Selected Object">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- Canvas Container -->
-<div id="canvas-container">
-  <canvas id="drawingCanvas" width="250" height="200"></canvas>
-</div>
-
-<script>
-  // Initialize Fabric.js Canvas
-  const canvas = new fabric.Canvas('drawingCanvas', {
-    preserveObjectStacking: true,
-    isDrawingMode: true
-  });
-  let ctx = canvas.getContext('2d');
-  // Set Canvas Size
-  const container = document.getElementById('canvas-container');
-  const width = 250;
-  const height = 200;
-  canvas.setWidth(width);
-  canvas.setHeight(height);
-  
-  // Centered Title - already done via CSS
-  
-  // Tool State
-  let currentTool = 'select'; // options: select, pencil, pen, line, eraser
-  let isDrawing = false;
-  let currentLine = null;
-  let startX = 0;
-  let startY = 0;
-  let undoStack = [];
-  let redoStack = [];
-  let isObjectLocked = false;
-  
-  // Get UI Elements
-  const selectBtn = document.getElementById('selectBtn');
-  const pencilBtn = document.getElementById('pencilBtn');
-  const penBtn = document.getElementById('penBtn');
-  const lineBtn = document.getElementById('lineBtn');
-  const eraserBtn = document.getElementById('eraserBtn');
-  const undoBtn = document.getElementById('undoBtn');
-  const redoBtn = document.getElementById('redoBtn');
-  const selectAllBtn = document.getElementById('selectAllBtn');
-  const lockObjBtn = document.getElementById('lockObjBtn');
-  const deleteObjBtn = document.getElementById('deleteObjBtn');
-  const zoomInBtn = document.getElementById('zoomInBtn');
-  const zoomOutBtn = document.getElementById('zoomOutBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const thicknessRange = document.getElementById('thicknessRange');
-  const colorPicker = document.getElementById('colorPicker');
-  const uploadImageBtn = document.getElementById('uploadImageBtn');
-  const imageUpload = document.getElementById('imageUpload');
-  const downloadButtons = document.querySelectorAll('.download-options button');
-
-  // Set default stroke width and color
-  let strokeWidth = parseInt(thicknessRange.value);
-  let strokeColor = colorPicker.value;
-
-  // Helper functions
-  function saveState() {
-    // Save current canvas state for undo
-    const json = JSON.stringify(canvas);
-    undoStack.push(json);
-    // Clear redo stack
-    redoStack = [];
-    updateUndoRedoButtons();
-  }
-
-  function undo() {
-    if (undoStack.length > 0) {
-      const lastState = undoStack.pop();
-      redoStack.push(JSON.stringify(canvas));
-      canvas.loadFromJSON(lastState, () => {
-        canvas.renderAll();
-        updateUndoRedoButtons();
-      });
-    }
-  }
-
-  function redo() {
-    if (redoStack.length > 0) {
-      const state = redoStack.pop();
-      undoStack.push(JSON.stringify(canvas));
-      canvas.loadFromJSON(state, () => {
-        canvas.renderAll();
-        updateUndoRedoButtons();
-      });
-    }
-  }
-
-  function updateUndoRedoButtons() {
-    undoBtn.disabled = undoStack.length === 0;
-    redoBtn.disabled = redoStack.length === 0;
-  }
-
-  function setActiveTool(tool) {
-    currentTool = tool;
-    // Update button states
-    document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
-    switch(tool) {
-      case 'select':
-        selectBtn.classList.add('active');
-        canvas.isDrawingMode = false;
-        break;
-      case 'pencil':
-        pencilBtn.classList.add('active');
-        canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-        canvas.freeDrawingBrush.width = strokeWidth;
-        canvas.freeDrawingBrush.color = strokeColor;
-        break;
-      case 'pen':
-        penBtn.classList.add('active');
-        canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-        canvas.freeDrawingBrush.width = strokeWidth;
-        canvas.freeDrawingBrush.color = strokeColor;
-        break;
-      case 'line':
-        lineBtn.classList.add('active');
-        canvas.isDrawingMode = false;
-        break;
-      case 'eraser':
-        eraserBtn.classList.add('active');
-        canvas.isDrawingMode = false;
-        break;
-    }
-  }
-
-  // Initialize default tool
-  setActiveTool('select');
-
-  // Event Listeners for Tool Buttons
-  selectBtn.addEventListener('click', () => setActiveTool('select'));
-  pencilBtn.addEventListener('click', () => setActiveTool('pencil'));
-  penBtn.addEventListener('click', () => setActiveTool('pen'));
-  lineBtn.addEventListener('click', () => setActiveTool('line'));
-  eraserBtn.addEventListener('click', () => setActiveTool('eraser'));
-
-  // Undo/Redo
-  document.getElementById('undoBtn').addEventListener('click', undo);
-  document.getElementById('redoBtn').addEventListener('click', redo);
-  updateUndoRedoButtons();
-
-  // Select All
-  document.getElementById('selectAllBtn').addEventListener('click', () => {
-    canvas.discardActiveObject();
-    const sel = new fabric.ActiveSelection(canvas.getObjects(), {
-      canvas: canvas,
-    });
-    canvas.setActiveObject(sel);
-    canvas.requestRenderAll();
-  });
-
-  // Lock / Unlock Object
-  document.getElementById('lockObjBtn').addEventListener('click', () => {
-    const activeObj = canvas.getActiveObject();
-    if (activeObj) {
-      activeObj.selectable = !activeObj.selectable;
-      activeObj.lockMovementX = !activeObj.lockMovementX;
-      activeObj.lockMovementY = !activeObj.lockMovementY;
-      activeObj.hasControls = activeObj.selectable;
-      canvas.requestRenderAll();
-    }
-  });
-
-  // Delete Object
-  document.getElementById('deleteObjBtn').addEventListener('click', () => {
-    const activeObject = canvas.getActiveObject();
-
-    // Get an array of all selected objects
-    const activeObjectsArray = canvas.getActiveObjects();
-
-    // To check if something is selected:
-    if (activeObject) {
-      saveState()
-      console.log("An object or a selection is active:", activeObject);
-      canvas.remove(activeObject);
-    } else {
-      console.log("No object is currently active.");
-    }
-
-    // To iterate through all selected objects in a multi-selection:
-    if (activeObjectsArray.length > 0) {
-      console.log("Currently selected objects:");
-      activeObjectsArray.forEach(obj => {
-        console.log(obj.type, obj.id); // Example: log object type and ID
-        canvas.remove(obj)
-      });
-      saveState();
-    } else {
-      console.log("No objects are selected.");
-    }
-
-    if (activeObj) {
-      saveState();
-      canvas.remove(activeObj);
-    }
-  });
-
-  // Zoom In / Out / Reset
-  let zoomFactor = 1;
-  document.getElementById('zoomInBtn').addEventListener('click', () => {
-    zoomFactor *= 1.2;
-    canvas.setZoom(zoomFactor);
-  });
-  document.getElementById('zoomOutBtn').addEventListener('click', () => {
-    zoomFactor /= 1.2;
-    if (zoomFactor < 0.2) zoomFactor = 0.2;
-    canvas.setZoom(zoomFactor);
-  });
-  document.getElementById('resetBtn').addEventListener('click', () => {
-    zoomFactor = 1;
-    canvas.setZoom(zoomFactor);
-    canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
-  });
-
-  // Thickness Slider
-  document.getElementById('thicknessRange').addEventListener('input', (e) => {
-    strokeWidth = parseInt(e.target.value);
-    thicknessValue.textContent = value;
-    if (canvas.freeDrawingBrush) {
-      canvas.freeDrawingBrush.width = strokeWidth;
-    }
-  });
-
-  // Color Picker
-  document.getElementById('colorPicker').addEventListener('change', (e) => {
-    strokeColor = e.target.value;
-    if (canvas.freeDrawingBrush) {
-      canvas.freeDrawingBrush.color = strokeColor;
-    }
-  });
-
-  // Upload Image
-  document.getElementById('uploadImageBtn').addEventListener('click', () => {
-    document.getElementById('imageUpload').click();
-  });
-
-  document.getElementById('imageUpload').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(f) {
-        fabric.Image.fromURL(f.target.result, (img) => {
-          saveState();
-          const canvasWidth = canvas.width;
-          const canvasHeight = canvas.height;
-
-          // Calculate scale to fit the image within the canvas while maintaining aspect ratio
-          const scaleX = canvasWidth / img.width;
-          const scaleY = canvasHeight / img.height;
-          const scale = Math.min(scaleX, scaleY);
-
-          // Scale the image
-          img.set({
-            scaleX: scale,
-            scaleY: scale,
-            originX: 'center',
-            originY: 'center',
-          });
-
-          // Center the image
-          img.set({
-            left: canvasWidth / 2,
-            top: canvasHeight / 2,
-          });
-          canvas.add(img);
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  // Download options
-  downloadButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const type = btn.getAttribute('data-type');
-      saveState(); // Save state before export
-      if (type === 'svg') {
-        const svg = canvas.toSVG();
-        const blob = new Blob([svg], {type: 'image/svg+xml'});
-        const url = URL.createObjectURL(blob);
-        triggerDownload(url, 'drawing.svg');
-      } else if (type === 'png') {
-        canvas.deactivateAll().renderAll();
-        const dataURL = canvas.toDataURL({format: 'png'});
-        triggerDownload(dataURL, 'drawing.png');
-      } else if (type === 'jpeg') {
-        canvas.deactivateAll().renderAll();
-        const dataURL = canvas.toDataURL({format: 'jpeg'});
-        triggerDownload(dataURL, 'drawing.jpg');
-      } else if (type === 'json') {
-        const json = JSON.stringify(canvas.toJSON());
-        const blob = new Blob([json], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        triggerDownload(url, 'drawing.json');
-      }
-    });
-  });
-
-  function triggerDownload(url, filename) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  // Canvas Drawing Logic
-  // For drawing shapes like lines and freehand
-  canvas.on('mouse:down', (opt) => {
-    if (currentTool === 'line') {
-      isDrawing = true;
-      const pointer = canvas.getPointer(opt.e);
-      startX = pointer.x;
-      startY = pointer.y;
-      currentLine = new fabric.Line([startX, startY, startX, startY], {
-        stroke: strokeColor,
-        strokeWidth: strokeWidth,
-        selectable: false,
-        evented: false,
-      });
-      canvas.add(currentLine);
-    } else if (currentTool === 'eraser') {
-      isDrawing = true;
-      saveState();
-    }
-  });
-
-  canvas.on('mouse:move', (opt) => {
-    if (!isDrawing) return;
-    if (currentTool === 'line') {
-      const pointer = canvas.getPointer(opt.e);
-      currentLine.set({ x2: pointer.x, y2: pointer.y });
-      canvas.requestRenderAll();
-    } else if (currentTool === 'eraser') {
-      const pointer = canvas.getPointer(opt.e);
-      // Eraser: delete objects under pointer or delete path
-      const objs = canvas.getObjects();
-      for (let i = objs.length -1; i >=0; i--) {
-        if (objs[i].containsPoint && objs[i].containsPoint({x: pointer.x, y: pointer.y})) {
-          // Remove object if under pointer
-          canvas.remove(objs[i]);
-        } else if (objs[i].type === 'path') {
-          // For freehand paths, check proximity
-          // For simplicity, delete paths close to pointer
-          const pathPoints = objs[i].path;
-          for (const p of pathPoints) {
-            if (Math.hypot(p.x - pointer.x, p.y - pointer.y) < strokeWidth) {
-              canvas.remove(objs[i]);
-              break;
+    <script>
+        class DrawingApp {
+            constructor() {
+                this.canvas = new fabric.Canvas('canvas');
+                this.currentTool = 'select';
+                this.isDrawing = false;
+                this.history = [];
+                this.historyIndex = -1;
+                this.currentZoom = 1;
+                
+                this.init();
+                this.saveState();
             }
-          }
+
+            init() {
+                this.canvas.backgroundColor = '#ffffff';
+                this.canvas.renderAll();
+                
+                this.setupEventListeners();
+                this.setupCanvasEvents();
+            }
+
+            setupEventListeners() {
+                // Tool selection
+                document.querySelectorAll('[data-tool]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.selectTool(e.target.closest('[data-tool]').dataset.tool);
+                    });
+                });
+
+                // Thickness control
+                document.getElementById('thickness').addEventListener('input', (e) => {
+                    this.updateBrushWidth(parseInt(e.target.value));
+                });
+
+                // Color picker
+                document.getElementById('colorPicker').addEventListener('change', (e) => {
+                    this.updateColor(e.target.value);
+                });
+
+                // Action buttons
+                document.getElementById('undo').addEventListener('click', () => this.undo());
+                document.getElementById('redo').addEventListener('click', () => this.redo());
+                document.getElementById('selectAll').addEventListener('click', () => this.selectAll());
+
+                // Zoom controls
+                document.getElementById('zoomIn').addEventListener('click', () => this.zoomIn());
+                document.getElementById('zoomOut').addEventListener('click', () => this.zoomOut());
+                document.getElementById('zoomReset').addEventListener('click', () => this.resetZoom());
+
+                // Upload and export
+                document.getElementById('uploadBtn').addEventListener('click', () => {
+                    document.getElementById('imageUpload').click();
+                });
+                
+                document.getElementById('imageUpload').addEventListener('change', (e) => {
+                    this.uploadImage(e);
+                });
+
+                document.getElementById('exportBtn').addEventListener('click', () => {
+                    this.toggleExportMenu();
+                });
+
+                document.querySelectorAll('.export-option').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.exportCanvas(e.target.dataset.format);
+                    });
+                });
+
+                // Object actions
+                document.getElementById('lockObject').addEventListener('click', () => this.lockSelectedObject());
+                document.getElementById('deleteObject').addEventListener('click', () => this.deleteSelectedObject());
+
+                // Close export menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.export-menu')) {
+                        document.getElementById('exportDropdown').classList.remove('show');
+                    }
+                });
+            }
+
+            setupCanvasEvents() {
+                this.canvas.on('path:created', () => {
+                    this.saveState();
+                });
+
+                this.canvas.on('object:added', () => {
+                    this.saveState();
+                });
+
+                this.canvas.on('object:removed', () => {
+                    this.saveState();
+                });
+
+                this.canvas.on('object:modified', () => {
+                    this.saveState();
+                });
+
+                // Eraser functionality
+                this.canvas.on('mouse:down', (options) => {
+                    console.log(this.currentTool);
+                    if (this.currentTool === 'eraser') {
+                        this.startErasing(options);
+                    }
+                });
+
+                this.canvas.on('mouse:move', (options) => {
+                    if (this.currentTool === 'eraser' && this.isDrawing) {
+                        this.erase(options);
+                    }
+                });
+
+                this.canvas.on('mouse:up', () => {
+                    if (this.currentTool === 'eraser') {
+                        this.stopErasing();
+                    }
+                });
+            }
+
+            selectTool(tool) {
+                document.querySelectorAll('[data-tool]').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-tool="${tool}"]`).classList.add('active');
+                
+                this.currentTool = tool;
+                this.canvas.isDrawingMode = false;
+                this.canvas.selection = false;
+                this.canvas.defaultCursor = 'default';
+
+                switch(tool) {
+                    case 'select':
+                        this.canvas.selection = true;
+                        this.canvas.defaultCursor = 'default';
+                        break;
+                    case 'pencil':
+                    case 'pen':
+                        this.canvas.isDrawingMode = true;
+                        this.updateBrushSettings();
+                        break;
+                    case 'line':
+                        this.setupLineTool();
+                        break;
+                    case 'eraser':
+                        this.canvas.defaultCursor = 'crosshair';
+                        break;
+                }
+            }
+
+            updateBrushSettings() {
+                const thickness = document.getElementById('thickness').value;
+                const color = document.getElementById('colorPicker').value;
+                
+                if (this.currentTool === 'pencil') {
+                    this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas);
+                } else if (this.currentTool === 'pen') {
+                    this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas);
+                }
+                
+                this.canvas.freeDrawingBrush.width = parseInt(thickness);
+                this.canvas.freeDrawingBrush.color = color;
+            }
+
+            updateBrushWidth(width) {
+                if (this.canvas.freeDrawingBrush) {
+                    this.canvas.freeDrawingBrush.width = width;
+                }
+            }
+
+            updateColor(color) {
+                if (this.canvas.freeDrawingBrush) {
+                    this.canvas.freeDrawingBrush.color = color;
+                }
+                
+                const activeObject = this.canvas.getActiveObject();
+                if (activeObject) {
+                    if (activeObject.type === 'path') {
+                        activeObject.set('stroke', color);
+                    } else {
+                        activeObject.set('fill', color);
+                    }
+                    this.canvas.renderAll();
+                }
+            }
+
+            setupLineTool() {
+                let line, isDown;
+                
+                this.canvas.on('mouse:down', (o) => {
+                    if (this.currentTool !== 'line') return;
+                    
+                    isDown = true;
+                    const pointer = this.canvas.getPointer(o.e);
+                    const points = [pointer.x, pointer.y, pointer.x, pointer.y];
+                    
+                    line = new fabric.Line(points, {
+                        strokeWidth: parseInt(document.getElementById('thickness').value),
+                        fill: document.getElementById('colorPicker').value,
+                        stroke: document.getElementById('colorPicker').value,
+                        originX: 'center',
+                        originY: 'center'
+                    });
+                    
+                    this.canvas.add(line);
+                });
+
+                this.canvas.on('mouse:move', (o) => {
+                    if (!isDown || this.currentTool !== 'line') return;
+                    
+                    const pointer = this.canvas.getPointer(o.e);
+                    line.set({ x2: pointer.x, y2: pointer.y });
+                    this.canvas.renderAll();
+                });
+
+                this.canvas.on('mouse:up', () => {
+                    if (this.currentTool !== 'line') return;
+                    isDown = false;
+                });
+            }
+
+            startErasing(options) {
+                this.isDrawing = true;
+                this.eraserPath = [];
+                this.erase(options);
+            }
+
+            erase(options) {
+                console.log('adfasdf')
+                const pointer = this.canvas.getPointer(options.e);
+                const eraserSize = parseInt(document.getElementById('thickness').value);
+                
+                // Add current point to eraser path
+                this.eraserPath.push({ x: pointer.x, y: pointer.y, radius: eraserSize / 2 });
+                
+                // Create eraser brush effect by drawing white circles
+                const eraserCircle = new fabric.Circle({
+                    left: pointer.x - eraserSize / 2,
+                    top: pointer.y - eraserSize / 2,
+                    radius: eraserSize / 2,
+                    fill: this.canvas.backgroundColor || '#ffffff',
+                    stroke: this.canvas.backgroundColor || '#ffffff',
+                    strokeWidth: 1,
+                    selectable: false,
+                    evented: false,
+                    globalCompositeOperation: 'destination-out'
+                });
+                
+                this.canvas.add(eraserCircle);
+                this.canvas.renderAll();
+            }
+
+            stopErasing() {
+                this.isDrawing = false;
+                this.eraserPath = [];
+                this.saveState();
+            }
+
+            saveState() {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.history = this.history.slice(0, this.historyIndex + 1);
+                }
+                
+                this.history.push(JSON.stringify(this.canvas.toJSON()));
+                this.historyIndex++;
+                
+                if (this.history.length > 50) {
+                    this.history.shift();
+                    this.historyIndex--;
+                }
+            }
+
+            undo() {
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    this.canvas.loadFromJSON(this.history[this.historyIndex], () => {
+                        this.canvas.renderAll();
+                    });
+                }
+            }
+
+            redo() {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.historyIndex++;
+                    this.canvas.loadFromJSON(this.history[this.historyIndex], () => {
+                        this.canvas.renderAll();
+                    });
+                }
+            }
+
+            selectAll() {
+                const objects = this.canvas.getObjects();
+                if (objects.length > 0) {
+                    const selection = new fabric.ActiveSelection(objects, {
+                        canvas: this.canvas,
+                    });
+                    this.canvas.setActiveObject(selection);
+                    this.canvas.renderAll();
+                }
+            }
+
+            zoomIn() {
+                this.currentZoom = Math.min(this.currentZoom * 1.1, 3);
+                this.canvas.setZoom(this.currentZoom);
+                this.updateZoomDisplay();
+            }
+
+            zoomOut() {
+                this.currentZoom = Math.max(this.currentZoom * 0.9, 0.1);
+                this.canvas.setZoom(this.currentZoom);
+                this.updateZoomDisplay();
+            }
+
+            resetZoom() {
+                this.currentZoom = 1;
+                this.canvas.setZoom(1);
+                this.canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+                this.updateZoomDisplay();
+            }
+
+            updateZoomDisplay() {
+                document.getElementById('zoomLevel').textContent = Math.round(this.currentZoom * 100) + '%';
+            }
+
+            uploadImage(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        fabric.Image.fromURL(e.target.result, (img) => {
+                            img.scaleToWidth(250);
+                            img.scaleToHeight(200);
+                            // this.canvas.add(img);
+                            this.canvas.setBackgroundImage(img);
+                            this.canvas.renderAll();
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            toggleExportMenu() {
+                document.getElementById('exportDropdown').classList.toggle('show');
+            }
+
+            exportCanvas(format) {
+                document.getElementById('exportDropdown').classList.remove('show');
+                
+                let dataURL;
+                let filename = `canvas_${Date.now()}`;
+                
+                switch(format) {
+                    case 'png':
+                        dataURL = this.canvas.toDataURL('image/png');
+                        filename += '.png';
+                        break;
+                    case 'jpg':
+                        dataURL = this.canvas.toDataURL('image/jpeg');
+                        filename += '.jpg';
+                        break;
+                    case 'svg':
+                        dataURL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(this.canvas.toSVG());
+                        filename += '.svg';
+                        break;
+                    case 'json':
+                        const jsonData = JSON.stringify(this.canvas.toJSON());
+                        dataURL = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonData);
+                        filename += '.json';
+                        break;
+                }
+                
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = dataURL;
+                link.click();
+            }
+
+            lockSelectedObject() {
+                const activeObject = this.canvas.getActiveObject();
+                if (activeObject) {
+                    activeObject.set({
+                        lockMovementX: true,
+                        lockMovementY: true,
+                        lockRotation: true,
+                        lockScalingX: true,
+                        lockScalingY: true,
+                        selectable: false
+                    });
+                    this.canvas.discardActiveObject();
+                    this.canvas.renderAll();
+                }
+            }
+
+            deleteSelectedObject() {
+                const activeObjects = this.canvas.getActiveObjects();
+                if (activeObjects.length > 0) {
+                    activeObjects.forEach(obj => {
+                        this.canvas.remove(obj);
+                    });
+                    this.canvas.discardActiveObject();
+                    this.canvas.renderAll();
+                }
+            }
         }
-      }
-      canvas.requestRenderAll();
-    }
-  });
 
-  canvas.on('mouse:up', (opt) => {
-    if (currentTool === 'line' && isDrawing) {
-      isDrawing = false;
-      saveState();
-      currentLine.set({ selectable: true, evented: true });
-      currentLine = null;
-    } else if (currentTool === 'eraser') {
-      isDrawing = false;
-    }
-  });
-
-  // For free drawing (pencil, pen)
-  canvas.on('path:created', () => {
-    saveState();
-  });
-
-  // Set freeDrawingBrush for pencil and pen
-  function setDrawingTool() {
-    if (currentTool === 'pencil' || currentTool === 'pen') {
-      canvas.isDrawingMode = true;
-      if (canvas.freeDrawingBrush) {
-        canvas.freeDrawingBrush.width = strokeWidth;
-        canvas.freeDrawingBrush.color = strokeColor;
-      } else {
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-        canvas.freeDrawingBrush.width = strokeWidth;
-        canvas.freeDrawingBrush.color = strokeColor;
-      }
-    } else {
-      canvas.isDrawingMode = false;
-    }
-  }
-
-  // Re-apply drawing mode when tools change
-  ['pencil', 'pen'].forEach(tool => {
-    document.getElementById(tool + 'Btn').addEventListener('click', () => {
-      setActiveTool(tool);
-      setDrawingTool();
-    });
-  });
-
-  // When stroke width or color change, update brush
-  thicknessRange.addEventListener('input', () => {
-    strokeWidth = parseInt(thicknessRange.value);
-    const thicknessValue = document.getElementById('thicknessValue');
-    thicknessValue.textContent = value;
-
-    if (canvas.freeDrawingBrush) {
-      canvas.freeDrawingBrush.width = strokeWidth;
-    }
-  });
-  colorPicker.addEventListener('change', () => {
-    strokeColor = colorPicker.value;
-    if (canvas.freeDrawingBrush) {
-      canvas.freeDrawingBrush.color = strokeColor;
-    }
-  });
-
-  // Tool buttons event
-  document.getElementById('selectBtn').addEventListener('click', () => {
-    setActiveTool('select');
-    canvas.isDrawingMode = false;
-  });
-  document.getElementById('lineBtn').addEventListener('click', () => {
-    setActiveTool('line');
-  });
-  document.getElementById('eraserBtn').addEventListener('click', () => {
-    setActiveTool('eraser');
-  });
-
-  // Lock/Unlock Object
-  document.getElementById('lockObjBtn').addEventListener('click', () => {
-    const activeObj = canvas.getActiveObject();
-    if (activeObj) {
-      activeObj.lockMovementX = !activeObj.lockMovementX;
-      activeObj.lockMovementY = !activeObj.lockMovementY;
-      activeObj.selectable = !activeObj.selectable;
-      canvas.requestRenderAll();
-    }
-  });
-
-  // Select Object
-  canvas.on('selection:created', () => {
-    // Optional: update UI
-  });
-
-  // For better UX, deselect on click on empty space
-  canvas.on('mouse:down', (opt) => {
-    if (!opt.target) {
-      canvas.discardActiveObject();
-      canvas.requestRenderAll();
-    }
-  });
-
-</script>
+        // Initialize the drawing app when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new DrawingApp();
+        });
+    </script>
 </body>
 </html>
