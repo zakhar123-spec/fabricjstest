@@ -407,27 +407,27 @@
                 this.currentTool = 'select';
                 this.isDrawing = false;
                 this.undoStack = [];
-        this.redoStack = [];
-        this.isUndoRedo = false; // To prevent recursive saveState calls during undo/redo
-        document.getElementById('undo').addEventListener('click', () => this.undo());
-        document.getElementById('redo').addEventListener('click', () => this.redo());
+                this.redoStack = [];
+                this.isUndoRedo = false; // To prevent recursive saveState calls during undo/redo
+                document.getElementById('undo').addEventListener('click', () => this.undo());
+                document.getElementById('redo').addEventListener('click', () => this.redo());
 
-        // Save state after every change
-        this.canvas.on('object:added', () => this.saveState());
-        this.canvas.on('object:modified', () => this.saveState());
-        this.canvas.on('object:removed', () => this.saveState());
-        this.canvas.on('path:created', () => this.saveState());
+                // Save state after every change
+                // this.canvas.on('object:added', () => this.saveState());
+                // this.canvas.on('object:modified', () => this.saveState());
+                // this.canvas.on('object:removed', () => this.saveState());
+                // this.canvas.on('path:created', () => this.saveState());
 
-        this.currentZoom = 1;
+                this.currentZoom = 1;
                 this.isPinching = false;
                 this.lastDistance = 0;
                 this.init();
                 this.saveState();
                 this.setupPinchZoom();
-                this.canvas.on('object:added', () => this.saveState());
-                this.canvas.on('object:modified', () => this.saveState());
-                this.canvas.on('object:removed', () => this.saveState());
-                this.canvas.on('path:created', () => this.saveState());
+                // this.canvas.on('object:added', () => this.saveState());
+                // this.canvas.on('object:modified', () => this.saveState());
+                // this.canvas.on('object:removed', () => this.saveState());
+                // this.canvas.on('path:created', () => this.saveState());
             }
             setupPinchZoom() {
                 const canvasEl = this.canvas.upperCanvasEl;
@@ -549,9 +549,9 @@
             }
 
             setupCanvasEvents() {
-                this.canvas.on('path:created', () => {
-                    this.saveState();
-                });
+                // this.canvas.on('path:created', () => {
+                //     this.saveState();
+                // });
 
                 this.canvas.on('object:added', () => {
                     this.saveState();
@@ -726,6 +726,7 @@
             // }
 
             saveState() {
+                console.log(this.undoStack);
                 if (this.isUndoRedo) return; // Don't record state during undo/redo
 
                 // Keep only recent 50 states
