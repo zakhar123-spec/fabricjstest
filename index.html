@@ -406,13 +406,13 @@
         return Math.hypot(dx, dy);
         }
 
-        canvas.upperCanvasEl.addEventListener('touchstart', function(e) {
+        canvas.addEventListener('touchstart', function(e) {
         if (e.touches.length === 2) {
             lastDistance = getDistance(e.touches);
         }
         });
 
-        canvas.upperCanvasEl.addEventListener('touchmove', function(e) {
+        canvas.addEventListener('touchmove', function(e) {
         if (e.touches.length === 2) {
             e.preventDefault(); // Prevent page scroll
             const currentDistance = getDistance(e.touches);
@@ -427,7 +427,7 @@
         }
         }, { passive: false });
 
-        canvas.upperCanvasEl.addEventListener('touchend', function(e) {
+        canvas.addEventListener('touchend', function(e) {
         if (e.touches.length < 2) {
             lastDistance = null;
         }
