@@ -298,18 +298,18 @@
                     <button class="tool-button active" data-tool="select" title="Select">
                         <i class="fas fa-mouse-pointer"></i>
                     </button>
-                    <button class="tool-button" data-tool="pencil" title="Pencil">
+                    <!-- <button class="tool-button" data-tool="pencil" title="Pencil">
                         <i class="fas fa-pencil-alt"></i>
-                    </button>
+                    </button> -->
                     <button class="tool-button" data-tool="pen" title="Pen">
                         <i class="fas fa-pen"></i>
                     </button>
                     <button class="tool-button" data-tool="line" title="Line">
                         <i class="fas fa-minus"></i>
                     </button>
-                    <button class="tool-button" data-tool="eraser" title="Eraser">
+                    <!-- <button class="tool-button" data-tool="eraser" title="Eraser">
                         <i class="fas fa-eraser"></i>
-                    </button>
+                    </button> -->
                 </div>
             </div>
 
@@ -491,24 +491,24 @@
                 });
 
                 // Eraser functionality
-                this.canvas.on('mouse:down', (options) => {
-                    console.log(this.currentTool);
-                    if (this.currentTool === 'eraser') {
-                        this.startErasing(options);
-                    }
-                });
+                // this.canvas.on('mouse:down', (options) => {
+                //     console.log(this.currentTool);
+                //     if (this.currentTool === 'eraser') {
+                //         this.startErasing(options);
+                //     }
+                // });
 
-                this.canvas.on('mouse:move', (options) => {
-                    if (this.currentTool === 'eraser' && this.isDrawing) {
-                        this.erase(options);
-                    }
-                });
+                // this.canvas.on('mouse:move', (options) => {
+                //     if (this.currentTool === 'eraser' && this.isDrawing) {
+                //         this.erase(options);
+                //     }
+                // });
 
-                this.canvas.on('mouse:up', () => {
-                    if (this.currentTool === 'eraser') {
-                        this.stopErasing();
-                    }
-                });
+                // this.canvas.on('mouse:up', () => {
+                //     if (this.currentTool === 'eraser') {
+                //         this.stopErasing();
+                //     }
+                // });
             }
 
             selectTool(tool) {
@@ -527,7 +527,7 @@
                         this.canvas.selection = true;
                         this.canvas.defaultCursor = 'default';
                         break;
-                    case 'pencil':
+                    // case 'pencil':
                     case 'pen':
                         this.canvas.isDrawingMode = true;
                         this.updateBrushSettings();
@@ -545,9 +545,10 @@
                 const thickness = document.getElementById('thickness').value;
                 const color = document.getElementById('colorPicker').value;
                 
-                if (this.currentTool === 'pencil') {
-                    this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas);
-                } else if (this.currentTool === 'pen') {
+                // if (this.currentTool === 'pencil') {
+                //     this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas);
+                // } else 
+                if (this.currentTool === 'pen') {
                     this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas);
                 }
                 
@@ -612,42 +613,42 @@
                 });
             }
 
-            startErasing(options) {
-                this.isDrawing = true;
-                this.eraserPath = [];
-                this.erase(options);
-            }
+            // startErasing(options) {
+            //     this.isDrawing = true;
+            //     this.eraserPath = [];
+            //     this.erase(options);
+            // }
 
-            erase(options) {
-                console.log('adfasdf')
-                const pointer = this.canvas.getPointer(options.e);
-                const eraserSize = parseInt(document.getElementById('thickness').value);
+            // erase(options) {
+            //     console.log('adfasdf')
+            //     const pointer = this.canvas.getPointer(options.e);
+            //     const eraserSize = parseInt(document.getElementById('thickness').value);
                 
-                // Add current point to eraser path
-                this.eraserPath.push({ x: pointer.x, y: pointer.y, radius: eraserSize / 2 });
+            //     // Add current point to eraser path
+            //     this.eraserPath.push({ x: pointer.x, y: pointer.y, radius: eraserSize / 2 });
                 
-                // Create eraser brush effect by drawing white circles
-                const eraserCircle = new fabric.Circle({
-                    left: pointer.x - eraserSize / 2,
-                    top: pointer.y - eraserSize / 2,
-                    radius: eraserSize / 2,
-                    fill: this.canvas.backgroundColor || '#ffffff',
-                    stroke: this.canvas.backgroundColor || '#ffffff',
-                    strokeWidth: 1,
-                    selectable: false,
-                    evented: false,
-                    globalCompositeOperation: 'destination-out'
-                });
+            //     // Create eraser brush effect by drawing white circles
+            //     const eraserCircle = new fabric.Circle({
+            //         left: pointer.x - eraserSize / 2,
+            //         top: pointer.y - eraserSize / 2,
+            //         radius: eraserSize / 2,
+            //         fill: this.canvas.backgroundColor || '#ffffff',
+            //         stroke: this.canvas.backgroundColor || '#ffffff',
+            //         strokeWidth: 1,
+            //         selectable: false,
+            //         evented: false,
+            //         globalCompositeOperation: 'destination-out'
+            //     });
                 
-                this.canvas.add(eraserCircle);
-                this.canvas.renderAll();
-            }
+            //     this.canvas.add(eraserCircle);
+            //     this.canvas.renderAll();
+            // }
 
-            stopErasing() {
-                this.isDrawing = false;
-                this.eraserPath = [];
-                this.saveState();
-            }
+            // stopErasing() {
+            //     this.isDrawing = false;
+            //     this.eraserPath = [];
+            //     this.saveState();
+            // }
 
             saveState() {
                 if (this.historyIndex < this.history.length - 1) {
