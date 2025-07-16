@@ -404,6 +404,7 @@
         class DrawingApp {
             constructor() {
                 this.canvas = new fabric.Canvas('canvas');
+                
                 this.currentTool = 'select';
                 this.isDrawing = false;
                 this.undoStack = [];
@@ -847,27 +848,31 @@
                 
                 let dataURL;
                 let filename = `canvas_${Date.now()}`;
-                
-                switch(format) {
-                    case 'png':
-                        dataURL = this.canvas.toDataURL('image/png');
-                        filename += '.png';
-                        break;
-                    case 'jpg':
-                        dataURL = this.canvas.toDataURL('image/jpeg');
-                        filename += '.jpg';
-                        break;
-                    case 'svg':
-                        dataURL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(this.canvas.toSVG());
-                        filename += '.svg';
-                        break;
-                    case 'json':
-                        const jsonData = JSON.stringify(this.canvas.toJSON());
-                        dataURL = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonData);
-                        filename += '.json';
-                        break;
-                }
-                
+                const originalBgColor = this.canvas.backgroundColor;
+
+                this.canvas.setBackgroundColor(null, () => {
+                    switch(format) {
+                        case 'png':
+                            dataURL = this.canvas.toDataURL('image/png');
+                            filename += '.png';
+                            break;
+                        case 'jpg':
+                            dataURL = this.canvas.toDataURL('image/jpeg');
+                            filename += '.jpg';
+                            break;
+                        case 'svg':
+                            dataURL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(this.canvas.toSVG());
+                            filename += '.svg';
+                            break;
+                        case 'json':
+                            const jsonData = JSON.stringify(this.canvas.toJSON());
+                            dataURL = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonData);
+                            filename += '.json';
+                            break;
+                    }
+                })
+                this.canvas.setBackgroundColor(originalBgColor, () => {});
+
                 const link = document.createElement('a');
                 link.download = filename;
                 link.href = dataURL;
